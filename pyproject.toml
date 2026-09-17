@@ -1,0 +1,16 @@
+[project]
+name = "ukesong"
+version = "0.1.0"
+description = "Turn a recording into ukulele notes and tab"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.24"]
+
+[project.scripts]
+ukesong = "ukesong.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["ukesong"]
