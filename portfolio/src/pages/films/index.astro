@@ -1,0 +1,84 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Panel from '../../components/Panel.astro';
+
+const films = (await getCollection('films')).sort(
+  (a, b) => Number(b.data.featured) - Number(a.data.featured) || b.data.year - a.data.year,
+);
+---
+
+<Base title="Films" description="Short films.">
+  <Panel title="Films" eyebrow="Showcase">
+    <div class="card-grid">
+      {
+        films.map((f) => (
+          <a class="card film" href={`/films/${f.id}`}>
+            <span class="thumb">
+              <img src={f.data.poster} alt="" loading="lazy" />
+              <span class="play" aria-hidden="true">
+                <svg viewBox="0 0 16 16">
+                  <path d="M4 2.5v11a.7.7 0 0 0 1.05.6l9-5.5a.7.7 0 0 0 0-1.2l-9-5.5A.7.7 0 0 0 4 2.5z" />
+                </svg>
+              </span>
+              <span class="runtime">{f.data.runtime}</span>
+            </span>
+            <div class="card-body">
+              <span class="eyebrow">
+                {f.data.year} · {f.data.role}
+              </span>
+              <h3>{f.data.title}</h3>
+              <p>{f.data.logline}</p>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </Panel>
+</Base>
+
+<style>
+  .thumb {
+    position: relative;
+    display: block;
+  }
+  .play {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    transform: scale(0.9);
+    transition:
+      opacity 0.3s,
+      transform 0.3s var(--ease);
+  }
+  .play svg {
+    width: 18px;
+    height: 18px;
+    margin-left: 3px;
+    fill: var(--ink);
+  }
+  .film:hover .play,
+  .film:focus-visible .play {
+    opacity: 1;
+    transform: none;
+  }
+  .runtime {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.6);
+  }
+</style>

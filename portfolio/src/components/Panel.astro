@@ -1,0 +1,161 @@
+---
+/**
+ * The translucent window every page lives in. It floats over the background
+ * reel, scrolls internally, and closes back to `back` (Esc does the same).
+ */
+interface Props {
+  title: string;
+  eyebrow?: string;
+  back?: string;
+  backLabel?: string;
+  /** 'watch' stops and dims the background reel (used by the film player). */
+  mode?: 'read' | 'watch';
+  size?: 'md' | 'lg';
+  /** Hide the big page heading (when the slot renders its own). */
+  hideTitle?: boolean;
+}
+const {
+  title,
+  eyebrow,
+  back = '/',
+  backLabel,
+  mode = 'read',
+  size = 'lg',
+  hideTitle = false,
+} = Astro.props;
+
+const panelAnim = {
+  forwards: {
+    old: { name: 'panelOut', duration: '0.28s', easing: 'ease-in', fillMode: 'both' },
+    new: { name: 'panelIn', duration: '0.5s', easing: 'cubic-bezier(0.2, 0.7, 0.1, 1)', fillMode: 'both' },
+  },
+  backwards: {
+    old: { name: 'panelOut', duration: '0.28s', easing: 'ease-in', fillMode: 'both' },
+    new: { name: 'panelIn', duration: '0.5s', easing: 'cubic-bezier(0.2, 0.7, 0.1, 1)', fillMode: 'both' },
+  },
+};
+---
+
+<section
+  class:list={['panel', 'glass', `size-${size}`]}
+  data-panel
+  data-mode={mode}
+  data-close={back}
+  aria-labelledby="panel-title"
+  transition:name="panel"
+  transition:animate={panelAnim}
+>
+  <div class="bar">
+    {
+      backLabel ? (
+        <a class="back" href={back}>
+          <span aria-hidden="true">←</span> {backLabel}
+        </a>
+      ) : (
+        <span class="eyebrow">{eyebrow}</span>
+      )
+    }
+    <a class="close" href={back} aria-label="Close panel" title="Close (Esc)">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9m0-9l-9 9" /></svg>
+    </a>
+  </div>
+  <div class="scroll" data-panel-scroll>
+    <h1 id="panel-title" class:list={['title', { 'sr-only': hideTitle }]} tabindex="-1">{title}</h1>
+    <slot />
+  </div>
+</section>
+
+<style>
+  .panel {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--nav-h) + 16px);
+    max-height: calc(100dvh - var(--nav-h) - 40px); /* grows with content, then scrolls */
+    transform: translateX(-50%);
+    width: min(1120px, calc(100% - 2 * var(--gutter)));
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .size-md {
+    width: min(820px, calc(100% - 2 * var(--gutter)));
+  }
+  .bar {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px 12px 22px;
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .back {
+    font-size: 14px;
+    color: var(--ink-muted);
+    text-decoration: none;
+  }
+  .back:hover {
+    color: var(--ink);
+  }
+  .close {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--ink-muted);
+    transition:
+      background 0.2s,
+      color 0.2s;
+  }
+  .close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--ink);
+  }
+  .close svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+  .scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: clamp(20px, 4vw, 44px);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+  .title {
+    font-size: clamp(2.6rem, 6vw, 4.8rem);
+    margin-bottom: 28px;
+    outline: none;
+  }
+
+  @media (max-width: 700px) {
+    .panel {
+      top: 12px;
+      max-height: calc(100dvh - 84px); /* clears the bottom nav */
+      width: calc(100% - 24px);
+    }
+  }
+</style>
+
+<script>
+  import { navigate } from 'astro:transitions/client';
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || e.defaultPrevented) return;
+    if (document.fullscreenElement) return;
+    const panel = document.querySelector<HTMLElement>('[data-panel]');
+    if (panel?.dataset.close) navigate(panel.dataset.close);
+  });
+
+  // Move focus into the window on arrival so keyboard and screen-reader users land in it.
+  document.addEventListener('astro:page-load', () => {
+    document.getElementById('panel-title')?.focus({ preventScroll: true });
+  });
+</script>

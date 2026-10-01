@@ -10,11 +10,11 @@ export const SITE = {
     { label: 'Vimeo', href: 'https://vimeo.com/' },
     { label: 'LinkedIn', href: 'https://linkedin.com/' },
   ],
-  // Background loop. Keep it short (10–20s), muted, and small (< 5 MB).
+  // Background reel. Always muted (browsers only autoplay muted video).
   background: {
-    webm: '/media/bg-loop.webm',
-    mp4: '/media/bg-loop.mp4',
-    poster: '/media/bg-poster.jpg',
+    mp4: '/media/bg-loop.mp4', // 720p, desktop
+    mobile: '/media/bg-loop-mobile.mp4', // 480p, small screens
+    poster: '/media/bg-poster.jpg', // first frame: shown while loading / when motion is reduced
   },
 };
 

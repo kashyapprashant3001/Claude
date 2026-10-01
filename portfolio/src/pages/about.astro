@@ -1,0 +1,59 @@
+---
+import Base from '../layouts/Base.astro';
+import Panel from '../components/Panel.astro';
+import { SITE } from '../site';
+---
+
+<Base title="About" description={`About ${SITE.name}.`}>
+  <Panel title="About" eyebrow="Hello" size="md">
+    <div class="about">
+      <img src="/images/mountain.jpg" alt="" />
+      <div class="prose">
+        <p class="lede">
+          I'm {SITE.name}, a {SITE.role.toLowerCase()} based in {SITE.location}. (Placeholder: replace with your story.)
+        </p>
+        <p>
+          A couple of paragraphs on how you work, what you care about, and how design and film feed each other.
+        </p>
+        <h3>Services</h3>
+        <ul>
+          <li>Product & interface design</li>
+          <li>Brand and motion identity</li>
+          <li>Short-form film, direction & edit</li>
+        </ul>
+        <h3>Selected clients</h3>
+        <p>Client one, Client two, Client three.</p>
+      </div>
+    </div>
+  </Panel>
+</Base>
+
+<style>
+  .about {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 36px;
+    align-items: start;
+  }
+  img {
+    border-radius: var(--radius-md);
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    width: 100%;
+  }
+  .lede {
+    font-size: 1.25rem;
+    color: var(--ink);
+  }
+  .prose h3:first-of-type {
+    margin-top: 1.2em;
+  }
+  @media (max-width: 640px) {
+    .about {
+      grid-template-columns: 1fr;
+    }
+    img {
+      max-width: 220px;
+    }
+  }
+</style>

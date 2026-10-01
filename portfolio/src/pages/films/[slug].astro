@@ -1,0 +1,83 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Panel from '../../components/Panel.astro';
+import FilmPlayer from '../../components/FilmPlayer.astro';
+
+export async function getStaticPaths() {
+  const films = await getCollection('films');
+  return films.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+---
+
+<Base title={d.title} description={d.logline} image={d.poster}>
+  <Panel title={d.title} back="/films" backLabel="All films" mode="watch" hideTitle>
+    <FilmPlayer title={d.title} poster={d.poster} src={d.src} embed={d.embed} />
+    <div class="info">
+      <div>
+        <p class="eyebrow">{d.year} · {d.runtime} · {d.role}</p>
+        <h2>{d.title}</h2>
+        <p class="logline">{d.logline}</p>
+        <article class="prose"><Content /></article>
+      </div>
+      {
+        d.credits.length > 0 && (
+          <aside>
+            <p class="eyebrow">Credits</p>
+            <dl>
+              {d.credits.map((c) => (
+                <div>
+                  <dt>{c.role}</dt>
+                  <dd>{c.name}</dd>
+                </div>
+              ))}
+            </dl>
+          </aside>
+        )
+      }
+    </div>
+  </Panel>
+</Base>
+
+<style>
+  .info {
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 40px;
+    margin-top: 32px;
+  }
+  h2 {
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    margin: 6px 0 10px;
+  }
+  .logline {
+    font-size: 1.2rem;
+    color: var(--ink-muted);
+    max-width: 52ch;
+    margin: 0 0 24px;
+  }
+  dl {
+    margin: 8px 0 0;
+  }
+  dl div {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--glass-border);
+  }
+  dt {
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+  dd {
+    margin: 0;
+  }
+  @media (max-width: 800px) {
+    .info {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  }
+</style>

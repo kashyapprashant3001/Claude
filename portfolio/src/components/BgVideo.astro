@@ -1,0 +1,92 @@
+---
+import { SITE } from '../site';
+const { mp4, mobile, poster } = SITE.background;
+---
+
+<div class="bg" transition:persist="bg" aria-hidden="true">
+  <video id="bg-video" muted loop playsinline preload="auto" poster={poster}>
+    <source src={mobile} type="video/mp4" media="(max-width: 700px)" />
+    <source src={mp4} type="video/mp4" />
+  </video>
+  <div class="scrim"></div>
+</div>
+
+<style>
+  .bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background: #0b0a0f url('/media/bg-poster.jpg') center / cover no-repeat;
+  }
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition:
+      filter 0.8s var(--ease),
+      transform 1.2s var(--ease);
+  }
+  /* Keeps overlay text readable whatever frame is playing. */
+  .scrim {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(120% 90% at 20% 100%, rgba(8, 6, 12, 0.75), transparent 60%),
+      linear-gradient(180deg, rgba(8, 6, 12, 0.45), rgba(8, 6, 12, 0.15) 30%, rgba(8, 6, 12, 0.55));
+    transition: background-color 0.8s var(--ease);
+  }
+  /* A panel is open: soften the reel so the window reads as foreground. */
+  :global(html[data-panel-open]) video {
+    filter: saturate(0.85) brightness(0.8);
+    transform: scale(1.04);
+  }
+  /* Watching a film: the reel stops and recedes. */
+  :global(html[data-mode='watch']) video {
+    filter: saturate(0.4) brightness(0.35) blur(6px);
+  }
+  :global(html[data-mode='watch']) .scrim {
+    background-color: rgba(0, 0, 0, 0.35);
+  }
+</style>
+
+<script>
+  const KEY = 'bg-paused';
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function userPaused() {
+    try {
+      return localStorage.getItem(KEY) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  function sync() {
+    const video = document.getElementById('bg-video') as HTMLVideoElement | null;
+    if (!video) return;
+    const watching = document.documentElement.dataset.mode === 'watch';
+    const shouldPlay = !reduce.matches && !userPaused() && !watching;
+    if (shouldPlay && video.paused) video.play().catch(() => {});
+    if (!shouldPlay && !video.paused) video.pause();
+    document.querySelectorAll<HTMLButtonElement>('[data-bg-toggle]').forEach((b) => {
+      const paused = !shouldPlay;
+      b.setAttribute('aria-pressed', String(paused));
+      b.setAttribute('aria-label', paused ? 'Play background video' : 'Pause background video');
+      b.dataset.state = paused ? 'paused' : 'playing';
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as Element).closest('[data-bg-toggle]');
+    if (!btn) return;
+    try {
+      localStorage.setItem(KEY, userPaused() ? '0' : '1');
+    } catch {}
+    sync();
+  });
+
+  reduce.addEventListener('change', sync);
+  document.addEventListener('bg:sync', sync);
+  document.addEventListener('astro:page-load', sync);
+</script>

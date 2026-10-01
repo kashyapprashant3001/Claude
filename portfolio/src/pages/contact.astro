@@ -1,0 +1,75 @@
+---
+import Base from '../layouts/Base.astro';
+import Panel from '../components/Panel.astro';
+import { SITE } from '../site';
+---
+
+<Base title="Contact" description={`Get in touch with ${SITE.name}.`}>
+  <Panel title="Let's make something" eyebrow="Contact" size="md">
+    <p class="intro">For design projects, film commissions or just to say hi.</p>
+    <a class="email" href={`mailto:${SITE.email}`}>{SITE.email} <span aria-hidden="true">↗</span></a>
+    <ul class="socials">
+      {
+        SITE.socials.map((s) => (
+          <li>
+            <a href={s.href} target="_blank" rel="noopener">
+              {s.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="loc">Based in {SITE.location}</p>
+  </Panel>
+</Base>
+
+<style>
+  .intro {
+    color: var(--ink-muted);
+    font-size: 1.15rem;
+    margin: -8px 0 28px;
+  }
+  .email {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 5vw, 3.2rem);
+    text-decoration: none;
+    border-bottom: 1px solid var(--glass-border);
+    transition:
+      color 0.2s,
+      border-color 0.2s;
+    word-break: break-all;
+  }
+  .email:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .socials {
+    list-style: none;
+    padding: 0;
+    margin: 36px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .socials a {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--glass-border);
+    text-decoration: none;
+    color: var(--ink-muted);
+    transition:
+      color 0.2s,
+      border-color 0.2s;
+  }
+  .socials a:hover {
+    color: var(--ink);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+  .loc {
+    margin-top: 40px;
+    color: var(--ink-faint);
+    font-size: 14px;
+  }
+</style>

@@ -1,0 +1,129 @@
+---
+import { NAV, SITE } from '../site';
+const path = Astro.url.pathname;
+const isActive = (href: string) => path === href || path.startsWith(href + '/');
+---
+
+<header class="nav-wrap">
+  <a href="/" class="brand glass" aria-label={`${SITE.name}, home`}>
+    <span class="dot" aria-hidden="true"></span>{SITE.name}
+  </a>
+  <nav class="links glass" aria-label="Main">
+    {
+      NAV.map((item) => (
+        <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+          {item.label}
+        </a>
+      ))
+    }
+  </nav>
+  <button class="bg-toggle glass" type="button" data-bg-toggle aria-pressed="false" aria-label="Pause background video">
+    <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.5" height="12" rx="1" /><rect x="9.5" y="2" width="3.5" height="12" rx="1" /></svg>
+    <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11a.7.7 0 0 0 1.05.6l9-5.5a.7.7 0 0 0 0-1.2l-9-5.5A.7.7 0 0 0 4 2.5z" /></svg>
+  </button>
+</header>
+
+<style>
+  .nav-wrap {
+    position: fixed;
+    z-index: 20;
+    top: 16px;
+    left: var(--gutter);
+    right: var(--gutter);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+  }
+  .nav-wrap > * {
+    pointer-events: auto;
+  }
+  .brand,
+  .links,
+  .bg-toggle {
+    height: 44px;
+    border-radius: 999px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 18px;
+    text-decoration: none;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+  }
+  .links {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .links a {
+    padding: 8px 14px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 14px;
+    color: var(--ink-muted);
+    white-space: nowrap;
+    transition:
+      color 0.2s,
+      background 0.2s;
+  }
+  .links a:hover {
+    color: var(--ink);
+  }
+  .links a[aria-current='page'] {
+    color: #160f08;
+    background: var(--ink);
+  }
+  .bg-toggle {
+    width: 44px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .bg-toggle svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+  }
+  .i-play,
+  .bg-toggle[data-state='paused'] .i-pause {
+    display: none;
+  }
+  .bg-toggle[data-state='paused'] .i-play {
+    display: block;
+  }
+
+  @media (max-width: 700px) {
+    .nav-wrap {
+      top: auto;
+      bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: none;
+    }
+    .links {
+      margin-left: 0;
+      flex: 1;
+      justify-content: space-between;
+    }
+    .links a {
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+  }
+</style>

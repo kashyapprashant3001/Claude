@@ -1,0 +1,83 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import BgVideo from '../components/BgVideo.astro';
+import Nav from '../components/Nav.astro';
+import { SITE } from '../site';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+}
+const { title, description = SITE.tagline, image = SITE.background.poster } = Astro.props;
+const fullTitle = title ? `${title} · ${SITE.name}` : `${SITE.name} · ${SITE.role}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(image, Astro.site)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#0b0a0f" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" as="image" href={SITE.background.poster} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600&display=swap"
+    />
+    <ClientRouter />
+  </head>
+  <body>
+    <a class="skip sr-only" href="#content">Skip to content</a>
+    <BgVideo />
+    <Nav />
+    <main id="content">
+      <slot />
+    </main>
+
+    <script>
+      // Reflect the current page's panel state onto <html> so the background can react.
+      function onPage() {
+        const root = document.documentElement;
+        const panel = document.querySelector<HTMLElement>('[data-panel]');
+        root.toggleAttribute('data-panel-open', !!panel);
+        if (panel?.dataset.mode) root.dataset.mode = panel.dataset.mode;
+        else delete root.dataset.mode;
+        document.dispatchEvent(new Event('bg:sync'));
+      }
+      document.addEventListener('astro:page-load', onPage);
+    </script>
+  </body>
+</html>
+
+<style>
+  main {
+    position: relative;
+    z-index: 10;
+    height: 100dvh;
+  }
+  .skip:focus {
+    position: fixed;
+    z-index: 100;
+    top: 8px;
+    left: 8px;
+    width: auto;
+    height: auto;
+    clip: auto;
+    padding: 8px 14px;
+    background: var(--ink);
+    color: #000;
+    border-radius: 8px;
+  }
+</style>

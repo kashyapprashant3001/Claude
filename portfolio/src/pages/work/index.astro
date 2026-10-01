@@ -1,0 +1,28 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Panel from '../../components/Panel.astro';
+
+const work = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Base title="Work" description="Selected design case studies.">
+  <Panel title="Selected work" eyebrow="Case studies">
+    <div class="card-grid">
+      {
+        work.map((item) => (
+          <a class="card" href={`/work/${item.id}`}>
+            <img src={item.data.cover} alt="" loading="lazy" />
+            <div class="card-body">
+              <span class="eyebrow">
+                {item.data.client} · {item.data.year}
+              </span>
+              <h3>{item.data.title}</h3>
+              <p>{item.data.summary}</p>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </Panel>
+</Base>

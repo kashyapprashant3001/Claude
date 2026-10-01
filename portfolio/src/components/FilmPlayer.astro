@@ -1,0 +1,264 @@
+---
+/**
+ * Showcase player. Self-hosted files get custom glass controls;
+ * Vimeo/YouTube URLs fall back to their own embedded player.
+ */
+interface Props {
+  title: string;
+  poster: string;
+  src?: string;
+  embed?: string;
+}
+const { title, poster, src, embed } = Astro.props;
+
+function embedUrl(url: string) {
+  const u = new URL(url);
+  if (u.hostname.includes('vimeo.com')) {
+    const id = u.pathname.split('/').filter(Boolean).pop();
+    return `https://player.vimeo.com/video/${id}?title=0&byline=0&portrait=0&dnt=1`;
+  }
+  if (u.hostname.includes('youtu')) {
+    const id = u.hostname === 'youtu.be' ? u.pathname.slice(1) : u.searchParams.get('v');
+    return `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1`;
+  }
+  return url;
+}
+---
+
+<div class="player" data-player>
+  {
+    src ? (
+      <>
+        <video src={src} poster={poster} preload="metadata" playsinline data-video aria-label={title} />
+        <button class="big-play" type="button" data-play aria-label={`Play ${title}`}>
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M4 2.5v11a.7.7 0 0 0 1.05.6l9-5.5a.7.7 0 0 0 0-1.2l-9-5.5A.7.7 0 0 0 4 2.5z" />
+          </svg>
+        </button>
+        <div class="controls glass" data-controls>
+          <button type="button" data-play aria-label="Play">
+            <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M4 2.5v11a.7.7 0 0 0 1.05.6l9-5.5a.7.7 0 0 0 0-1.2l-9-5.5A.7.7 0 0 0 4 2.5z" />
+            </svg>
+            <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true">
+              <rect x="3" y="2" width="3.5" height="12" rx="1" />
+              <rect x="9.5" y="2" width="3.5" height="12" rx="1" />
+            </svg>
+          </button>
+          <span class="time" data-time>0:00</span>
+          <input class="scrub" type="range" min="0" max="1000" value="0" step="1" aria-label="Seek" data-scrub />
+          <span class="time" data-duration>0:00</span>
+          <button type="button" data-mute aria-label="Mute">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M2 6h2.5L8 3v10L4.5 10H2z" />
+              <path class="waves" d="M10.5 5.5a3.5 3.5 0 0 1 0 5M12.5 3.5a6.3 6.3 0 0 1 0 9" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+              <path class="x" d="M10.5 6l4 4m0-4l-4 4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+            </svg>
+          </button>
+          <button type="button" data-fs aria-label="Full screen">
+            <svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+              <path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10" />
+            </svg>
+          </button>
+        </div>
+      </>
+    ) : embed ? (
+      <iframe
+        src={embedUrl(embed)}
+        title={title}
+        loading="lazy"
+        allow="autoplay; fullscreen; picture-in-picture"
+        allowfullscreen
+      />
+    ) : (
+      <img src={poster} alt="" />
+    )
+  }
+</div>
+
+<style>
+  .player {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.8);
+  }
+  video,
+  iframe,
+  img {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    object-fit: contain;
+    background: #000;
+  }
+  button {
+    border: 0;
+    background: none;
+    color: var(--ink);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+  .big-play {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    transition:
+      transform 0.3s var(--ease),
+      opacity 0.3s;
+  }
+  .big-play svg {
+    width: 26px;
+    height: 26px;
+    margin-left: 4px;
+  }
+  .big-play:hover {
+    transform: scale(1.06);
+  }
+  .controls {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    transition:
+      opacity 0.35s,
+      transform 0.35s var(--ease);
+  }
+  .controls button {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex: none;
+  }
+  .controls button:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .time {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-muted);
+    min-width: 3.2ch;
+  }
+  .scrub {
+    flex: 1;
+    min-width: 0;
+    accent-color: var(--accent);
+    height: 4px;
+    cursor: pointer;
+  }
+  .i-pause,
+  .x {
+    display: none;
+  }
+  [data-state='playing'] .i-play,
+  [data-state='playing'] .big-play {
+    display: none;
+  }
+  [data-state='playing'] .i-pause {
+    display: block;
+  }
+  [data-muted] .x {
+    display: block;
+  }
+  [data-muted] .waves {
+    display: none;
+  }
+  /* Hide controls while playing and the pointer is idle. */
+  [data-state='playing'][data-idle] .controls {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  [data-state='playing'][data-idle] {
+    cursor: none;
+  }
+</style>
+
+<script>
+  const fmt = (s: number) => {
+    if (!isFinite(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    return `${m}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+  };
+
+  function setup(root: HTMLElement) {
+    const video = root.querySelector<HTMLVideoElement>('[data-video]');
+    if (!video || root.dataset.ready) return;
+    root.dataset.ready = '1';
+
+    const scrub = root.querySelector<HTMLInputElement>('[data-scrub]')!;
+    const time = root.querySelector('[data-time]')!;
+    const duration = root.querySelector('[data-duration]')!;
+    let idleTimer: number | undefined;
+
+    const toggle = () => (video.paused ? video.play() : video.pause());
+    const poke = () => {
+      root.removeAttribute('data-idle');
+      clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => root.setAttribute('data-idle', ''), 2200);
+    };
+
+    root.querySelectorAll('[data-play]').forEach((b) => b.addEventListener('click', toggle));
+    video.addEventListener('click', toggle);
+    video.addEventListener('play', () => {
+      root.dataset.state = 'playing';
+      poke();
+    });
+    video.addEventListener('pause', () => {
+      root.dataset.state = 'paused';
+      root.removeAttribute('data-idle');
+    });
+    video.addEventListener('loadedmetadata', () => (duration.textContent = fmt(video.duration)));
+    video.addEventListener('timeupdate', () => {
+      time.textContent = fmt(video.currentTime);
+      if (video.duration) scrub.value = String((video.currentTime / video.duration) * 1000);
+    });
+    scrub.addEventListener('input', () => {
+      if (video.duration) video.currentTime = (Number(scrub.value) / 1000) * video.duration;
+    });
+    root.querySelector('[data-mute]')!.addEventListener('click', () => {
+      video.muted = !video.muted;
+      root.toggleAttribute('data-muted', video.muted);
+    });
+    root.querySelector('[data-fs]')!.addEventListener('click', () => {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (root.requestFullscreen) root.requestFullscreen();
+      else (video as any).webkitEnterFullscreen?.(); // iOS Safari
+    });
+    root.addEventListener('pointermove', poke);
+    root.addEventListener('keydown', (e) => {
+      if ((e.target as Element).matches('input')) return;
+      if (e.key === ' ' || e.key === 'k') {
+        e.preventDefault();
+        toggle();
+      } else if (e.key === 'ArrowRight') video.currentTime += 5;
+      else if (e.key === 'ArrowLeft') video.currentTime -= 5;
+      else if (e.key === 'f') root.querySelector<HTMLButtonElement>('[data-fs]')!.click();
+      else if (e.key === 'm') root.querySelector<HTMLButtonElement>('[data-mute]')!.click();
+    });
+    if (video.readyState >= 1) duration.textContent = fmt(video.duration);
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll<HTMLElement>('[data-player]').forEach(setup);
+  });
+</script>

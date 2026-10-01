@@ -202,3 +202,19 @@ h3 {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------- Panel transitions (used by Panel.astro) ---------- */
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+    filter: blur(6px);
+  }
+}
+@keyframes panelOut {
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.99);
+    filter: blur(4px);
+  }
+}
